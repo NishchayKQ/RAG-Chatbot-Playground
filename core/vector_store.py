@@ -16,12 +16,13 @@ vector_store = Chroma(
 )
 
 
-def load_pdf(files: list[IO[bytes]] | IO[bytes]):
-    """adds the file(s) bytes to chromadb"""
+def load_pdf(file: IO[bytes], file_name: str):
+    """adds the file bytes to chromadb"""
 
     # TODO refine these
     loader = UnstructuredLoader(
-        file=files,
+        file=file,
+        metadata_filename=file_name,
         chunking_strategy="by_title",
         max_characters=1500,
         new_after_n_chars=1000,
@@ -40,4 +41,3 @@ def retrieve_context(query: str):
         for doc in retrieved_docs
     )
     return serialized, retrieved_docs
-

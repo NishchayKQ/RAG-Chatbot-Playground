@@ -19,7 +19,8 @@ for message in st.session_state.messages:
 if prompt := st.chat_input("What is up?", accept_file=True, file_type=["pdf"]):
 
     if prompt.files:
-        vector_store.load_pdf(prompt.files)
+        for file in prompt.files:
+            vector_store.load_pdf(file=file, file_name=file.name)
 
 
     # Add user message to chat history
