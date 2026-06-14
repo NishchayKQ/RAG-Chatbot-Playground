@@ -1,19 +1,10 @@
-import json
-import os
-
+from collections.abc import Generator
 
 from langchain.agents import create_agent
 from langchain.agents.middleware import dynamic_prompt, ModelRequest
 from langchain.chat_models import init_chat_model
-from collections.abc import Generator
 
 from core.vector_store import vector_store
-
-# TODO setup run config and switch to env vars
-
-with open("secrets.json") as f:
-    secrets = json.load(f)
-    os.environ["GROQ_API_KEY"] = secrets["GROQ_API_KEY"]
 
 model = init_chat_model(
     "llama-3.1-8b-instant",
@@ -49,12 +40,12 @@ agent = create_agent(model, tools=[], middleware=[prompt_with_context])
 
 def get_agent_response_for_query(query: str) -> Generator[str, None, None]:
     for chunk in agent.stream({"messages": [{"role": "user", "content": query}]}, stream_mode="messages", version="v2"):
-        if chunk["type"] == "messages": # filter only messages
+        if chunk["type"] == "messages":  # filter only messages
             token, metadata = chunk["data"]
 
             # we send just the text to streamlit
             if token.content:
                 yield token.content
 
-        #TODO reasoning print, and is any other type of message returned here
+        # TODO reasoning print, and is any other type of message returned here
         # https://docs.langchain.com/oss/python/langchain/streaming#llm-tokens
