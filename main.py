@@ -10,7 +10,7 @@ st.title("Rag chat")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat messages from history on app rerun
+# Redraw all previous messages on the screen after a rerun
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
@@ -18,25 +18,34 @@ for message in st.session_state.messages:
 # Accept user input
 if prompt := st.chat_input("What is up?", accept_file=True, file_type=["pdf"]):
 
+    # process any files user uploads
     if prompt.files:
-        for file in prompt.files:
-            vector_store.load_pdf(file=file, file_name=file.name)
-
-
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt.text})
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt.text)
-
-        if prompt.files:
+        # Show a UI spinner while ChromaDB processes the PDF
+        with st.status(f"Indexing {len(prompt.files)} file(s)...", expanded=True) as status:
             for file in prompt.files:
-                st.write(file.name)
+                st.write(f"Chunking and embedding {file.name}...")
+                vector_store.load_pdf(file=file, file_name=file.name)
 
-    if prompt.text: # if user sent a text message process it
-        # Display assistant response in chat message container
+            # Change spinner to a green checkmark when done
+            status.update(label="Files successfully added to database!", state="complete", expanded=False)
+
+        # Add a visual note to the chat history so the user knows the file was processed
+        file_msg = '\n'.join([f"📁{file.name}" for file in prompt.files])
+        st.session_state.messages.append({"role": "user", "content": file_msg})
+        with st.chat_message("user"):
+            st.markdown(file_msg)
+
+    # We check if text exists, because they might have ONLY uploaded a file
+    if prompt.text:
+        # Display and save the user's question
+        with st.chat_message("user"):
+            st.markdown(prompt.text)
+        st.session_state.messages.append({"role": "user", "content": prompt.text})
+
+        # Display the streaming assistant response
         with st.chat_message("assistant"):
             # noinspection PyTypeChecker
             response = st.write_stream(get_agent_response_for_query(prompt.text))
-        # Add assistant response to chat history
+
+        # Save the final assistant string to the history
         st.session_state.messages.append({"role": "assistant", "content": response})
