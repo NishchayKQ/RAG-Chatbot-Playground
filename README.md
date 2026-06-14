@@ -23,6 +23,25 @@ Think of it as a bare-bones, lightweight alternative to NotebookLM: it parses, c
 below chat uses [this](https://engineering.purdue.edu/kak/compsec/NewLectures/Lecture4.pdf) source pdf
 <img width="811" height="931" alt="Screenshot From 2026-06-14 12-11-48 (Edited)" src="https://github.com/user-attachments/assets/4dfcf52a-da44-4651-9a5e-a2a6d496bf23" />
 
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/NishchayKQ/RAG-Chatbot-Playground
+   ```
+
+2. Set up a virtual environment:
+   ```bash
+   uv sync
+   ```
+3. export groq api keys
+   ```bash
+   export GROQ_API_KEY="your-groq-api-key"
+   ```
+4. run the app with:
+   ```bash
+   uv run streamlit run main.py
+   ```
 
 ## Project Structure
 
